@@ -1,12 +1,14 @@
 @echo off
 REM Starts both Spring Boot backends in new windows, then opens the frontend.
-REM Pre-req: MongoDB running on localhost:27018
+REM Pre-req: MongoDB on 27017 (temp) + 27018 (currency)
+
+set ROOT=%~dp0..\..
 
 echo Starting Temperature backend (port 8181)...
-start "Temperature Backend (8181)" cmd /k "cd /d C:\Users\DELL\OneDrive\Desktop\SOC\lab2\tempconverter && mvnw.cmd spring-boot:run"
+start "Temperature Backend (8181)" cmd /k "cd /d "%ROOT%\tempconverter" && mvnw.cmd spring-boot:run"
 
 echo Starting Currency backend (port 8081)...
-start "Currency Backend (8081)" cmd /k "cd /d \"C:\Users\DELL\OneDrive\Desktop\SOC\doller converter\currencyconverter\" && mvnw.cmd spring-boot:run"
+start "Currency Backend (8081)" cmd /k "cd /d "%ROOT%\currencyconverter" && mvnw.cmd spring-boot:run"
 
 echo.
 echo Waiting 25 seconds for backends to boot...

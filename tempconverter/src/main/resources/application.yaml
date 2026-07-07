@@ -7,7 +7,7 @@ spring:
       database: tempconverter
     
 server:
-  port: 8185
+  port: 8181
 
   
 

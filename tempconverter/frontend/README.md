@@ -25,7 +25,11 @@ SOC/
 
 ### 1. Start MongoDB
 
-Both apps point at `mongodb://localhost:27018`. Make sure your Mongo container / service is up on port **27018**.
+Both apps use separate MongoDB servers and databases:
+- Temperature: `mongodb://localhost:27017/tempconverter`
+- Currency: `mongodb://localhost:27018/currency_db`
+
+Run `start-mongodb-27018.bat` from the project root before starting the currency backend (27017 is the default Windows MongoDB service).
 
 ### 2. Start the Temperature backend
 
@@ -77,7 +81,7 @@ Both backends now have a `WebConfig.java` that enables CORS for `/api/**` from a
 
 ## Troubleshooting
 
-- **Backend offline dot is red** → That backend isn't running, or Mongo isn't up on port 27018.
+- **Backend offline dot is red** → That backend isn't running, or its MongoDB isn't up (27017 for temp, 27018 for currency).
 - **"Could not reach … backend"** → Same as above; check the terminal where you ran `mvnw spring-boot:run`.
 - **Want to change the API URLs?** → Edit the two constants at the top of `app.js`:
   ```js
