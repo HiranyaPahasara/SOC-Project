@@ -1,7 +1,6 @@
 package com.hiranya.currencyconverter.service;
 
 import com.hiranya.currencyconverter.model.CurrencyLog;
-import com.hiranya.currencyconverter.model.SafetyCheckResult;
 import com.hiranya.currencyconverter.repository.CurrencyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,30 +54,6 @@ public class CurrencyService {
 
     public void clearHistory() {
         repository.deleteAll();
-    }
-
-    public SafetyCheckResult safetyCheck(double amount, String from) {
-        if (amount <= 0) {
-            return new SafetyCheckResult(false,
-                    "Amount must be greater than zero.",
-                    amount, from);
-        }
-
-        if (amount > 1_000_000) {
-            return new SafetyCheckResult(false,
-                    "Amount exceeds the safe limit of 1,000,000.",
-                    amount, from);
-        }
-
-        if (!from.equalsIgnoreCase("USD") && !from.equalsIgnoreCase("LKR")) {
-            return new SafetyCheckResult(false,
-                    "Unsupported currency. Use USD or LKR.",
-                    amount, from);
-        }
-
-        return new SafetyCheckResult(true,
-                "Amount and currency are within safe limits.",
-                amount, from);
     }
 
     public List<CurrencyLog> getFilteredHistory(String from) {
