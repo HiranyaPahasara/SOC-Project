@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: tempconverter
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/tempconverter
+      database: tempconverter
+    
+server:
+  port: 8185
+
+  
+

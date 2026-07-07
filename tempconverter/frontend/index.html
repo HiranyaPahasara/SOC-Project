@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Converter Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <div class="mesh-bg" aria-hidden="true">
+        <div class="mesh-blob mesh-1"></div>
+        <div class="mesh-blob mesh-2"></div>
+        <div class="mesh-blob mesh-3"></div>
+        <div class="mesh-blob mesh-4"></div>
+    </div>
+    <div class="noise" aria-hidden="true"></div>
+    <div class="grid-overlay" aria-hidden="true"></div>
+
+    <div class="app">
+        <!-- TOP BAR -->
+        <header class="topbar">
+            <div class="logo">
+                <div class="logo-mark">
+                    <span class="logo-shine" aria-hidden="true"></span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 8h13"/>
+                        <path d="M14 5l3 3-3 3"/>
+                        <path d="M20 16H7"/>
+                        <path d="M10 19l-3-3 3-3"/>
+                    </svg>
+                </div>
+                <span>Converter<span class="logo-accent">Hub</span></span>
+            </div>
+
+            <nav class="tabs" role="tablist">
+                <button class="tab active" data-tab="temperature" role="tab">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+                    </svg>
+                    <span>Temperature</span>
+                </button>
+                <button class="tab" data-tab="currency" role="tab">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"/>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                    <span>Currency</span>
+                </button>
+                <button class="tab" data-tab="history" role="tab">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 1 0 3-6.7L3 8"/>
+                        <path d="M3 3v5h5"/>
+                        <path d="M12 7v5l3 2"/>
+                    </svg>
+                    <span>History</span>
+                </button>
+                <div class="tab-indicator" aria-hidden="true"></div>
+            </nav>
+
+            <div class="topbar-right">
+                <div class="status-pill themed warm">
+                    <span class="pill-icon gradient-warm">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+                        </svg>
+                    </span>
+                    <span class="status-label">Temp Converter</span>
+                    <span id="status-temp" class="status-dot"></span>
+                </div>
+                <div class="status-pill themed cool">
+                    <span class="pill-icon gradient-cool">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="1" x2="12" y2="23"/>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        </svg>
+                    </span>
+                    <span class="status-label">Currency Converter</span>
+                    <span id="status-currency" class="status-dot"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN -->
+        <main class="stage">
+            <!-- TEMPERATURE PANEL -->
+            <section id="panel-temperature" class="panel active" role="tabpanel">
+                <div class="card glow-card">
+                    <div class="card-inner">
+                        <div class="card-head">
+                            <div class="icon-wrap gradient-warm">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2>Temperature Converter</h2>
+                                <p class="hint">Celsius &harr; Fahrenheit</p>
+                            </div>
+                        </div>
+
+                        <form id="temp-form" class="form">
+                            <div class="field">
+                                <label for="temp-value">Value</label>
+                                <div class="input-row">
+                                    <input
+                                        type="number"
+                                        id="temp-value"
+                                        step="any"
+                                        placeholder="0"
+                                        autocomplete="off"
+                                        required
+                                    />
+                                    <span id="temp-suffix" class="suffix">&deg;C</span>
+                                </div>
+                                <div class="presets">
+                                    <button type="button" class="chip" data-target="temp-value" data-value="0">Freezing 0&deg;</button>
+                                    <button type="button" class="chip" data-target="temp-value" data-value="25">Room 25&deg;</button>
+                                    <button type="button" class="chip" data-target="temp-value" data-value="37">Body 37&deg;</button>
+                                    <button type="button" class="chip" data-target="temp-value" data-value="100">Boiling 100&deg;</button>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label>From Unit</label>
+                                <div class="segmented" data-target="temp-unit">
+                                    <div class="seg-pill" aria-hidden="true"></div>
+                                    <button type="button" class="seg active" data-value="CELSIUS">&deg;C Celsius</button>
+                                    <button type="button" class="seg" data-value="FAHRENHEIT">&deg;F Fahrenheit</button>
+                                </div>
+                                <input type="hidden" id="temp-unit" value="CELSIUS" />
+                            </div>
+
+                            <div id="temp-preview" class="preview"></div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn primary gradient-warm-btn">
+                                    <span>Convert &amp; Save</span>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M5 12h14M13 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                                <button type="button" id="temp-latest" class="btn ghost">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 8v4l3 2"/>
+                                        <circle cx="12" cy="12" r="9"/>
+                                    </svg>
+                                    Latest
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="temp-result" class="result hidden"></div>
+                        <div id="temp-error" class="error hidden"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CURRENCY PANEL -->
+            <section id="panel-currency" class="panel" role="tabpanel">
+                <div class="card glow-card">
+                    <div class="card-inner">
+                        <div class="card-head">
+                            <div class="icon-wrap gradient-cool">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="1" x2="12" y2="23"/>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2>Currency Converter</h2>
+                                <p class="hint">USD &harr; LKR · 1 USD = 300 LKR</p>
+                            </div>
+                        </div>
+
+                        <form id="currency-form" class="form">
+                            <div class="field">
+                                <label for="currency-amount">Amount</label>
+                                <div class="input-row">
+                                    <span id="currency-prefix" class="prefix">$</span>
+                                    <input
+                                        type="number"
+                                        id="currency-amount"
+                                        step="any"
+                                        placeholder="0"
+                                        autocomplete="off"
+                                        required
+                                    />
+                                </div>
+                                <div class="presets">
+                                    <button type="button" class="chip" data-target="currency-amount" data-value="1">1</button>
+                                    <button type="button" class="chip" data-target="currency-amount" data-value="10">10</button>
+                                    <button type="button" class="chip" data-target="currency-amount" data-value="100">100</button>
+                                    <button type="button" class="chip" data-target="currency-amount" data-value="1000">1,000</button>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label>From Currency</label>
+                                <div class="segmented" data-target="currency-from">
+                                    <div class="seg-pill" aria-hidden="true"></div>
+                                    <button type="button" class="seg active" data-value="USD">$ USD</button>
+                                    <button type="button" class="seg" data-value="LKR">Rs LKR</button>
+                                </div>
+                                <input type="hidden" id="currency-from" value="USD" />
+                            </div>
+
+                            <div id="currency-preview" class="preview"></div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn primary gradient-cool-btn">
+                                    <span>Convert &amp; Save</span>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M5 12h14M13 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+                                <button type="button" id="currency-latest" class="btn ghost">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 8v4l3 2"/>
+                                        <circle cx="12" cy="12" r="9"/>
+                                    </svg>
+                                    Latest
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="currency-result" class="result hidden"></div>
+                        <div id="currency-error" class="error hidden"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- HISTORY PANEL -->
+            <section id="panel-history" class="panel" role="tabpanel">
+                <div class="card glow-card history-card">
+                    <div class="card-inner">
+                        <div class="card-head between">
+                            <div class="head-left">
+                                <div class="icon-wrap gradient-violet">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 12a9 9 0 1 0 3-6.7L3 8"/>
+                                        <path d="M3 3v5h5"/>
+                                        <path d="M12 7v5l3 2"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2>History</h2>
+                                    <p class="hint">Saved to MongoDB</p>
+                                </div>
+                            </div>
+                            <button id="refresh-history" class="btn ghost" type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M23 4v6h-6"/>
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                                </svg>
+                                Refresh
+                            </button>
+                        </div>
+
+                        <div class="history-grid">
+                            <div class="history-col">
+                                <div class="history-col-head">
+                                    <span class="dot gradient-warm-dot"></span>
+                                    <h3>Temperature</h3>
+                                    <span id="temp-count" class="count">0</span>
+                                    <button id="clear-temp" class="btn ghost btn-sm" type="button" title="Delete all temperature history">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="3 6 5 6 21 6"/>
+                                            <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
+                                            <path d="M10 11v6M14 11v6"/>
+                                            <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
+                                        </svg>
+                                        Clear
+                                    </button>
+                                </div>
+                                <div id="temp-history" class="history-list">
+                                    <p class="empty">Loading...</p>
+                                </div>
+                            </div>
+                            <div class="history-col">
+                                <div class="history-col-head">
+                                    <span class="dot gradient-cool-dot"></span>
+                                    <h3>Currency</h3>
+                                    <span id="currency-count" class="count">0</span>
+                                    <button id="clear-currency" class="btn ghost btn-sm" type="button" title="Delete all currency history">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="3 6 5 6 21 6"/>
+                                            <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
+                                            <path d="M10 11v6M14 11v6"/>
+                                            <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
+                                        </svg>
+                                        Clear
+                                    </button>
+                                </div>
+                                <div id="currency-history" class="history-list">
+                                    <p class="empty">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
