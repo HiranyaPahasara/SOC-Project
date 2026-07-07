@@ -1,6 +1,7 @@
 package com.hiranya.currencyconverter.controller;
 
 import com.hiranya.currencyconverter.model.CurrencyLog;
+import com.hiranya.currencyconverter.model.SafetyCheckResult;
 import com.hiranya.currencyconverter.service.CurrencyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +34,17 @@ public class CurrencyController {
     @GetMapping("/history")
     public List<CurrencyLog> history() {
         return service.getAll();
+    }
+
+    @GetMapping("/history/filter")
+    public List<CurrencyLog> filteredHistory(@RequestParam(required = false) String from) {
+        return service.getFilteredHistory(from);
+    }
+
+    @GetMapping("/safety-check")
+    public SafetyCheckResult safetyCheck(@RequestParam double amount,
+                                         @RequestParam String from) {
+        return service.safetyCheck(amount, from);
     }
 
     @GetMapping("/latest")

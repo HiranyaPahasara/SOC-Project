@@ -1,5 +1,6 @@
 package com.example.tempconverter.service;
 
+import com.example.tempconverter.model.SafetyCheckResult;
 import com.example.tempconverter.model.TemperatureLog;
 import com.example.tempconverter.repository.TemperatureRepository;
 import org.springframework.stereotype.Service;
@@ -52,5 +53,48 @@ public class TemperatureService {
 
     public void clearHistory() {
         temperatureRepository.deleteAll();
+    }
+
+    public SafetyCheckResult safetyCheck(double value, String unit) {
+        boolean isCelsius = isCelsiusUnit(unit);
+
+        if (isCelsius) {
+            if (value < -273.15) {
+                return new SafetyCheckResult(false,
+                        "Temperature is below absolute zero (-273.15°C).",
+                        value, unit);
+            }
+            if (value > 1000) {
+                return new SafetyCheckResult(false,
+                        "Temperature exceeds the safe limit of 1000°C.",
+                        value, unit);
+            }
+        } else {
+            if (value < -459.67) {
+                return new SafetyCheckResult(false,
+                        "Temperature is below absolute zero (-459.67°F).",
+                        value, unit);
+            }
+            if (value > 1832) {
+                return new SafetyCheckResult(false,
+                        "Temperature exceeds the safe limit of 1832°F.",
+                        value, unit);
+            }
+        }
+
+        return new SafetyCheckResult(true,
+                "Temperature is within safe limits.",
+                value, unit);
+    }
+
+    public List<TemperatureLog> getFilteredHistory(String unit) {
+        if (unit == null || unit.isBlank()) {
+            return temperatureRepository.findAll();
+        }
+        return temperatureRepository.findByInputUnitIgnoreCaseOrderByTimestampDesc(unit);
+    }
+
+    private boolean isCelsiusUnit(String unit) {
+        return "C".equalsIgnoreCase(unit) || "CELSIUS".equalsIgnoreCase(unit);
     }
 }
