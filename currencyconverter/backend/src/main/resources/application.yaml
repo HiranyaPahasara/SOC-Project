@@ -1,9 +1,10 @@
 spring:
   application:
     name: currencyconverter
-  mongodb:
-    uri: mongodb://localhost:27018/currency_db
-    database: currency_db
-      
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/currency_db
+      database: currency_db
+
 server:
   port: 8081

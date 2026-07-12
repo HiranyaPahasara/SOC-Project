@@ -98,7 +98,7 @@ TEMP_PID=$!
 echo "Starting Currency Converter on :8081 ..."
 java ${JAVA_OPTS:-} -jar /app/currencyconverter.jar \
   --server.port=8081 \
-  --spring.mongodb.uri="${SPRING_MONGODB_URI}" &
+  --spring.data.mongodb.uri="${SPRING_MONGODB_URI}" &
 CURR_PID=$!
 
 cleanup() {

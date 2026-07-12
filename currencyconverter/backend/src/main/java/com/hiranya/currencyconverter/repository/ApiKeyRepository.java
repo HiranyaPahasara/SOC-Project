@@ -1,3 +1,5 @@
+package com.hiranya.currencyconverter.repository;
+
 import com.hiranya.currencyconverter.model.ApiKey;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;

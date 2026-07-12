@@ -270,45 +270,11 @@ function renderResult(el, { fromValue, toValue, toSuffix }) {
             </svg>
             <div class="side to-side">
                 <span class="label">Result</span>
-                <span class="value" id="result-counter">0${toSuffix}</span>
+                <span class="value">${formatNumber(Number(toValue))}${toSuffix}</span>
             </div>
         </div>
     `;
     show(el);
-
-    const counter = el.querySelector("#result-counter");
-    animateCounter(counter, 0, Number(toValue), 700, toSuffix);
-    spawnSparkles(el);
-}
-
-function animateCounter(el, from, to, duration, suffix) {
-    const start = performance.now();
-    const step = (now) => {
-        const t = Math.min((now - start) / duration, 1);
-        const eased = 1 - Math.pow(1 - t, 3);
-        const value = from + (to - from) * eased;
-        el.textContent = formatNumber(value) + suffix;
-        if (t < 1) requestAnimationFrame(step);
-        else el.textContent = formatNumber(to) + suffix;
-    };
-    requestAnimationFrame(step);
-}
-
-function spawnSparkles(container) {
-    for (let i = 0; i < 12; i++) {
-        const s = document.createElement("span");
-        s.className = "sparkle";
-        const angle = (Math.PI * 2 * i) / 12 + Math.random() * 0.5;
-        const dist = 50 + Math.random() * 40;
-        s.style.setProperty("--dx", `${Math.cos(angle) * dist}px`);
-        s.style.setProperty("--dy", `${Math.sin(angle) * dist}px`);
-        s.style.left = "50%";
-        s.style.top = "50%";
-        s.style.background = i % 2 === 0 ? "#34d399" : "#a7f3d0";
-        s.style.animationDelay = `${Math.random() * 100}ms`;
-        container.appendChild(s);
-        setTimeout(() => s.remove(), 1100);
-    }
 }
 
 /* ============== Latest & Clear buttons ============== */
@@ -457,7 +423,7 @@ function renderTempHistory(container, items) {
             const inSym = it.inputUnit === "CELSIUS" ? "\u00B0C" : "\u00B0F";
             const outSym = it.outputUnit === "CELSIUS" ? "\u00B0C" : "\u00B0F";
             return `
-                <div class="history-item" style="animation-delay:${idx * 25}ms">
+                <div class="history-item">
                     <div class="conv">
                         <span>${formatNumber(it.inputTemperature)}${inSym}</span>
                         <span class="mid-arrow">&rarr;</span>
@@ -477,8 +443,8 @@ function renderCurrencyHistory(container, items) {
     const reversed = [...items].reverse();
     container.innerHTML = reversed
         .map(
-            (it, idx) => `
-                <div class="history-item" style="animation-delay:${idx * 25}ms">
+            (it) => `
+                <div class="history-item">
                     <div class="conv">
                         <span>${formatNumber(it.inputAmount)} ${it.fromCurrency.toUpperCase()}</span>
                         <span class="mid-arrow">&rarr;</span>
