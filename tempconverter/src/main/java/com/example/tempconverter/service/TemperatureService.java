@@ -1,7 +1,9 @@
 package com.example.tempconverter.service;
 
+import com.example.tempconverter.exception.UnauthorizedException;
 import com.example.tempconverter.model.SafetyCheckResult;
 import com.example.tempconverter.model.TemperatureLog;
+import com.example.tempconverter.repository.ApiKeyRepository;
 import com.example.tempconverter.repository.TemperatureRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -10,9 +12,22 @@ import java.util.List;
 public class TemperatureService {
 
     private final TemperatureRepository temperatureRepository;
+    private final ApiKeyRepository apiKeyRepository;
 
-    public TemperatureService(TemperatureRepository temperatureRepository) {
+    public TemperatureService(TemperatureRepository temperatureRepository,
+                              ApiKeyRepository apiKeyRepository) {
         this.temperatureRepository = temperatureRepository;
+        this.apiKeyRepository = apiKeyRepository;
+    }
+
+    public void validateApiKey(String requestKey) {
+        if (requestKey == null || requestKey.isEmpty()) {
+            throw new UnauthorizedException("API Key missing from HTTP Headers!");
+        }
+
+        if (apiKeyRepository.findByKeyValueAndActiveTrue(requestKey.trim()).isEmpty()) {
+            throw new UnauthorizedException("Invalid, inactive, or revoked API Key provided!");
+        }
     }
 
     public TemperatureLog convertAndSave(double value, String unit) {

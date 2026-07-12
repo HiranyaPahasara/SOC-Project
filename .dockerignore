@@ -1,0 +1,16 @@
+.git
+.gitignore
+**/.idea
+**/.vscode
+**/*.iml
+**/target
+**/HELP.md
+**/*.md
+**/frontend/README.md
+**/frontend/*.bat
+mongodb-27018
+start-*.bat
+**/Dockerfile
+**/docker-compose.yml
+**/.dockerignore
+signlang*

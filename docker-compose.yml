@@ -1,0 +1,60 @@
+# Single Convert Hub image + two MongoDB databases
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: converter-hub:latest
+    container_name: converter-hub
+    ports:
+      - "80:80"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://temp-mongo:27017/tempconverter
+      SPRING_MONGODB_URI: mongodb://currency-mongo:27017/currency_db
+    depends_on:
+      temp-mongo:
+        condition: service_healthy
+      currency-mongo:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - hub-net
+
+  temp-mongo:
+    image: mongo:7
+    container_name: converter-hub-temp-mongo
+    volumes:
+      - temp_mongo_data:/data/db
+      - ./docker/mongo-init-temp.js:/docker-entrypoint-initdb.d/01-api-keys.js:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - hub-net
+
+  currency-mongo:
+    image: mongo:7
+    container_name: converter-hub-currency-mongo
+    volumes:
+      - currency_mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - hub-net
+
+volumes:
+  temp_mongo_data:
+  currency_mongo_data:
+
+networks:
+  hub-net:
+    driver: bridge
