@@ -4,19 +4,19 @@
 # ---------- Build Temperature Converter ----------
 FROM maven:3.9-eclipse-temurin-21 AS build-temp
 WORKDIR /build
-COPY tempconverter/pom.xml .
-COPY tempconverter/.mvn ./.mvn
-COPY tempconverter/mvnw tempconverter/mvnw.cmd ./
-COPY tempconverter/src ./src
+COPY tempconverter/backend/pom.xml .
+COPY tempconverter/backend/.mvn ./.mvn
+COPY tempconverter/backend/mvnw tempconverter/backend/mvnw.cmd ./
+COPY tempconverter/backend/src ./src
 RUN mvn -q -DskipTests package
 
 # ---------- Build Currency Converter ----------
 FROM maven:3.9-eclipse-temurin-21 AS build-currency
 WORKDIR /build
-COPY currencyconverter/pom.xml .
-COPY currencyconverter/.mvn ./.mvn
-COPY currencyconverter/mvnw currencyconverter/mvnw.cmd ./
-COPY currencyconverter/src ./src
+COPY currencyconverter/backend/pom.xml .
+COPY currencyconverter/backend/.mvn ./.mvn
+COPY currencyconverter/backend/mvnw currencyconverter/backend/mvnw.cmd ./
+COPY currencyconverter/backend/src ./src
 RUN mvn -q -DskipTests package
 
 # ---------- Runtime: one image, frontend + both APIs ----------
@@ -32,7 +32,7 @@ WORKDIR /app
 
 COPY --from=build-temp /build/target/tempconverter-0.0.1-SNAPSHOT.jar /app/tempconverter.jar
 COPY --from=build-currency /build/target/currencyconverter-0.0.1-SNAPSHOT.jar /app/currencyconverter.jar
-COPY tempconverter/frontend/ /usr/share/nginx/html/
+COPY frontend/ /usr/share/nginx/html/
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY docker/entrypoint.sh /app/entrypoint.sh
 

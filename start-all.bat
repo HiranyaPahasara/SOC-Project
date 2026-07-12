@@ -1,9 +1,9 @@
 @echo off
 REM Starts both Spring Boot backends, then opens the unified frontend.
-REM Pre-req: MongoDB on 27017 (temp) + 27018 (currency). Run start-mongodb-27018.bat first if needed.
+REM Pre-req: MongoDB for temp + currency. Run start-mongodb.bat first if needed.
 
-echo Starting MongoDB for currency (port 27018) if not already running...
-call "%~dp0start-mongodb-27018.bat"
+echo Starting MongoDB for currency if not already running...
+call "%~dp0start-mongodb.bat"
 
 set ROOT=%~dp0
 

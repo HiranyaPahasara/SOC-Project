@@ -25,7 +25,7 @@ services:
     container_name: converter-hub-temp-mongo
     volumes:
       - temp_mongo_data:/data/db
-      - ./docker/mongo-init-temp.js:/docker-entrypoint-initdb.d/01-api-keys.js:ro
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/01-api-keys.js:ro
     healthcheck:
       test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
       interval: 10s

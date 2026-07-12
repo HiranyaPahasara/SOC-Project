@@ -29,7 +29,7 @@ Both apps use separate MongoDB servers and databases:
 - Temperature: `mongodb://localhost:27017/tempconverter`
 - Currency: `mongodb://localhost:27018/currency_db`
 
-Run `start-mongodb-27018.bat` from the project root before starting the currency backend (27017 is the default Windows MongoDB service).
+Run `start-mongodb.bat` from the project root before starting the currency backend (27017 is the default Windows MongoDB service).
 
 ### 2. Start the Temperature backend
 
