@@ -4,19 +4,19 @@
 # ---------- Build Temperature Converter ----------
 FROM maven:3.9-eclipse-temurin-21 AS build-temp
 WORKDIR /build
-COPY tempconverter/pom.xml .
-COPY tempconverter/.mvn ./.mvn
-COPY tempconverter/mvnw tempconverter/mvnw.cmd ./
-COPY tempconverter/src ./src
+COPY tempconverter/backend/pom.xml .
+COPY tempconverter/backend/.mvn ./.mvn
+COPY tempconverter/backend/mvnw tempconverter/backend/mvnw.cmd ./
+COPY tempconverter/backend/src ./src
 RUN mvn -q -DskipTests package
 
 # ---------- Build Currency Converter ----------
 FROM maven:3.9-eclipse-temurin-21 AS build-currency
 WORKDIR /build
-COPY currencyconverter/pom.xml .
-COPY currencyconverter/.mvn ./.mvn
-COPY currencyconverter/mvnw currencyconverter/mvnw.cmd ./
-COPY currencyconverter/src ./src
+COPY currencyconverter/backend/pom.xml .
+COPY currencyconverter/backend/.mvn ./.mvn
+COPY currencyconverter/backend/mvnw currencyconverter/backend/mvnw.cmd ./
+COPY currencyconverter/backend/src ./src
 RUN mvn -q -DskipTests package
 
 # ---------- Runtime: one image, frontend + both APIs ----------
@@ -32,9 +32,106 @@ WORKDIR /app
 
 COPY --from=build-temp /build/target/tempconverter-0.0.1-SNAPSHOT.jar /app/tempconverter.jar
 COPY --from=build-currency /build/target/currencyconverter-0.0.1-SNAPSHOT.jar /app/currencyconverter.jar
-COPY tempconverter/frontend/ /usr/share/nginx/html/
-COPY docker/nginx.conf /etc/nginx/nginx.conf
-COPY docker/entrypoint.sh /app/entrypoint.sh
+COPY frontend/ /usr/share/nginx/html/
+
+# nginx config (frontend + reverse proxy to both backends) — generated inline
+RUN cat <<'NGINX_CONF' > /etc/nginx/nginx.conf
+worker_processes auto;
+error_log /var/log/nginx/error.log warn;
+pid /run/nginx/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+    sendfile      on;
+    keepalive_timeout 65;
+    client_max_body_size 10m;
+
+    server {
+        listen 80;
+        server_name _;
+
+        root /usr/share/nginx/html;
+        index index.html;
+
+        location /api/temperatures/ {
+            proxy_pass         http://127.0.0.1:8181;
+            proxy_http_version 1.1;
+            proxy_set_header   Host $host;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header   X-Forwarded-Proto $scheme;
+            proxy_set_header   X-API-KEY $http_x_api_key;
+        }
+
+        location /api/currency/ {
+            proxy_pass         http://127.0.0.1:8081;
+            proxy_http_version 1.1;
+            proxy_set_header   Host $host;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header   X-Forwarded-Proto $scheme;
+        }
+
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+    }
+}
+NGINX_CONF
+
+# Startup script: launch both backends, then nginx — generated inline
+RUN cat <<'ENTRYPOINT_SH' > /app/entrypoint.sh
+#!/bin/bash
+set -euo pipefail
+
+echo "Starting Temperature Converter on :8181 ..."
+java ${JAVA_OPTS:-} -jar /app/tempconverter.jar \
+  --server.port=8181 \
+  --spring.data.mongodb.uri="${SPRING_DATA_MONGODB_URI}" &
+TEMP_PID=$!
+
+echo "Starting Currency Converter on :8081 ..."
+java ${JAVA_OPTS:-} -jar /app/currencyconverter.jar \
+  --server.port=8081 \
+  --spring.data.mongodb.uri="${SPRING_MONGODB_URI}" &
+CURR_PID=$!
+
+cleanup() {
+  echo "Shutting down..."
+  kill "$TEMP_PID" "$CURR_PID" 2>/dev/null || true
+  nginx -s quit 2>/dev/null || true
+}
+trap cleanup SIGTERM SIGINT
+
+echo "Waiting for backends..."
+for i in $(seq 1 60); do
+  if curl -fsS "http://127.0.0.1:8181/" >/dev/null 2>&1 \
+     && curl -fsS "http://127.0.0.1:8081/api/currency/preview?amount=1&from=USD" >/dev/null 2>&1; then
+    echo "Backends are ready."
+    break
+  fi
+  if ! kill -0 "$TEMP_PID" 2>/dev/null || ! kill -0 "$CURR_PID" 2>/dev/null; then
+    echo "A backend process exited unexpectedly."
+    wait || true
+    exit 1
+  fi
+  sleep 2
+done
+
+echo "Starting nginx on :80 ..."
+nginx -g 'daemon off;' &
+NGINX_PID=$!
+
+wait -n "$TEMP_PID" "$CURR_PID" "$NGINX_PID"
+EXIT_CODE=$?
+cleanup
+exit "$EXIT_CODE"
+ENTRYPOINT_SH
 
 RUN chmod +x /app/entrypoint.sh \
     && chown -R spring:spring /app
