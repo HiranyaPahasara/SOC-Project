@@ -1,5 +1,10 @@
-const TEMP_API = "http://localhost:8181/api/temperatures";
-const CURRENCY_API = "http://localhost:8081/api/currency";
+const TEMP_API = "/api/temperatures";
+const CURRENCY_API = "/api/currency";
+const TEMP_API_KEY = localStorage.getItem("TEMP_API_KEY") || "lab05-demo-key";
+
+function tempHeaders(extra = {}) {
+    return { "X-API-KEY": TEMP_API_KEY, ...extra };
+}
 
 document.addEventListener("DOMContentLoaded", () => {
     setupTabs();
@@ -136,7 +141,7 @@ async function runTempPreview() {
     const seq = ++tempPreviewSeq;
     try {
         const url = `${TEMP_API}/preview?value=${encodeURIComponent(tv)}&unit=${encodeURIComponent(tu)}`;
-        const res = await fetch(url);
+        const res = await fetch(url, { headers: tempHeaders() });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (seq !== tempPreviewSeq) return;
@@ -197,7 +202,7 @@ function setupTemperatureForm() {
 
         try {
             const url = `${TEMP_API}/convert?value=${encodeURIComponent(value)}&unit=${encodeURIComponent(unit)}`;
-            const res = await fetch(url, { method: "POST" });
+            const res = await fetch(url, { method: "POST", headers: tempHeaders() });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
             const data = await res.json();
@@ -210,7 +215,7 @@ function setupTemperatureForm() {
                 toSuffix: outSym,
             });
         } catch (err) {
-            errorEl.textContent = `Could not reach Temperature backend (port 8181). ${err.message}`;
+            errorEl.textContent = `Could not reach Temperature backend. ${err.message}`;
             show(errorEl);
         } finally {
             setLoading(btn, false);
@@ -245,7 +250,7 @@ function setupCurrencyForm() {
                 toSuffix: ` ${data.toCurrency.toUpperCase()}`,
             });
         } catch (err) {
-            errorEl.textContent = `Could not reach Currency backend (port 8081). ${err.message}`;
+            errorEl.textContent = `Could not reach Currency backend. ${err.message}`;
             show(errorEl);
         } finally {
             setLoading(btn, false);
@@ -327,7 +332,7 @@ async function loadLatest(kind) {
     setLoading(btn, true);
 
     try {
-        const res = await fetch(url);
+        const res = await fetch(url, isTemp ? { headers: tempHeaders() } : undefined);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const text = await res.text();
         if (!text) {
@@ -383,7 +388,10 @@ async function clearHistory(kind) {
     setLoading(btn, true);
 
     try {
-        const res = await fetch(url, { method: "DELETE" });
+        const res = await fetch(url, {
+            method: "DELETE",
+            ...(isTemp ? { headers: tempHeaders() } : {}),
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         if (isTemp) loadTempHistory();
         else loadCurrencyHistory();
@@ -410,7 +418,7 @@ async function loadTempHistory() {
     container.innerHTML = `<p class="empty">Loading...</p>`;
 
     try {
-        const res = await fetch(`${TEMP_API}/history`);
+        const res = await fetch(`${TEMP_API}/history`, { headers: tempHeaders() });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         countEl.textContent = data.length;
@@ -484,14 +492,14 @@ function renderCurrencyHistory(container, items) {
 
 /* ============== Health checks ============== */
 async function pingBackends() {
-    pingOne(`${TEMP_API}/history`, "status-temp");
+    pingOne(`${TEMP_API}/history`, "status-temp", tempHeaders());
     pingOne(`${CURRENCY_API}/history`, "status-currency");
 }
 
-async function pingOne(url, dotId) {
+async function pingOne(url, dotId, headers) {
     const dot = document.getElementById(dotId);
     try {
-        const res = await fetch(url, { method: "GET" });
+        const res = await fetch(url, { method: "GET", headers });
         dot.classList.remove("online", "offline");
         dot.classList.add(res.ok ? "online" : "offline");
     } catch {
